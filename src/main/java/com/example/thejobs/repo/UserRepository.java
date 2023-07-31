@@ -1,6 +1,6 @@
 package com.example.thejobs.repo;
 
-import com.example.thejobs.dto.user.User;
+import com.example.thejobs.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,7 +1,6 @@
-package com.example.thejobs.dto.auth;
+package com.example.thejobs.entity;
 
 import com.example.thejobs.dto.enums.TokenType;
-import com.example.thejobs.dto.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

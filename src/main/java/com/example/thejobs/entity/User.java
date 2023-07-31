@@ -1,6 +1,5 @@
-package com.example.thejobs.dto.user;
+package com.example.thejobs.entity;
 
-import com.example.thejobs.dto.auth.Token;
 import com.example.thejobs.dto.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

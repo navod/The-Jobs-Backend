@@ -1,6 +1,6 @@
 package com.example.thejobs.repo;
 
-import com.example.thejobs.dto.auth.Token;
+import com.example.thejobs.entity.Token;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

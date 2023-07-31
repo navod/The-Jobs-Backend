@@ -1,6 +1,6 @@
 package com.example.thejobs.services.impl;
 
-import com.example.thejobs.dto.user.User;
+import com.example.thejobs.entity.User;
 import com.example.thejobs.services.JWTService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
