@@ -69,8 +69,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .refreshToken(refreshToken)
                 .build();
     }
-
-    private void saveUserToken(User user, String jwtToken) {
+    @Override
+    public void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()
                 .user(user)
                 .token(jwtToken)
