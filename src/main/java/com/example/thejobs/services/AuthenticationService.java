@@ -1,47 +1,20 @@
 package com.example.thejobs.services;
 
-import com.example.thejobs.dto.AuthenticationRequest;
-import com.example.thejobs.dto.AuthenticationResponse;
-import com.example.thejobs.dto.RegisterRequest;
-import com.example.thejobs.dto.user.Role;
-import com.example.thejobs.dto.user.User;
-import com.example.thejobs.repo.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import com.example.thejobs.dto.auth.AuthenticationRequest;
+import com.example.thejobs.dto.auth.AuthenticationResponse;
+import com.example.thejobs.dto.auth.RegisterRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-@Service
-@RequiredArgsConstructor
-public class AuthenticationService {
+import java.io.IOException;
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JWTService jwtService;
-    private final AuthenticationManager authenticationManager;
+public interface AuthenticationService {
 
-    public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(Role.USER)
-                .build();
-        userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder().token(jwtToken).build();
-    }
+    AuthenticationResponse register(RegisterRequest request);
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.getEmail(),
-                request.getPassword()
-        ));
+    AuthenticationResponse authenticate(AuthenticationRequest request);
 
-        var user =  userRepository.findByEmail(request.getEmail()).orElseThrow();
-        var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder().token(jwtToken).build();
-    }
+
+    void refreshToken(HttpServletRequest request, HttpServletResponse response
+    ) throws IOException;
 }

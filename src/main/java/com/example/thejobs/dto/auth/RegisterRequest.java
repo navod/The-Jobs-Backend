@@ -1,5 +1,6 @@
-package com.example.thejobs.dto;
+package com.example.thejobs.dto.auth;
 
+import com.example.thejobs.dto.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationRequest {
+public class RegisterRequest {
+    private String firstname;
+    private String lastname;
     private String email;
     private String password;
+    private Role role;
 }
