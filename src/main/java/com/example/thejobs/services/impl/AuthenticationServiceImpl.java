@@ -1,11 +1,13 @@
 package com.example.thejobs.services.impl;
 
+import com.example.thejobs.advice.ResponsePayload;
 import com.example.thejobs.dto.auth.AuthenticationRequest;
 import com.example.thejobs.dto.auth.AuthenticationResponse;
 import com.example.thejobs.dto.auth.RegisterRequest;
 import com.example.thejobs.entity.Token;
 import com.example.thejobs.dto.enums.TokenType;
 import com.example.thejobs.entity.User;
+import com.example.thejobs.exception.UserNotFoundException;
 import com.example.thejobs.repo.TokenRepository;
 import com.example.thejobs.repo.UserRepository;
 import com.example.thejobs.services.AuthenticationService;
@@ -14,7 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +28,7 @@ import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
@@ -32,26 +37,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public AuthenticationResponse register(RegisterRequest request) {
-        User user = User.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .build();
-        var savedUser = repository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
-        saveUserToken(savedUser, jwtToken);
-        return AuthenticationResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
+    public ResponsePayload register(RegisterRequest request) {
+        try {
+            User user = User.builder()
+                    .firstname(request.getFirstname())
+                    .lastname(request.getLastname())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .role(request.getRole())
+                    .build();
+            var savedUser = repository.save(user);
+            var jwtToken = jwtService.generateToken(user);
+            var refreshToken = jwtService.generateRefreshToken(user);
+            saveUserToken(savedUser, jwtToken);
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), AuthenticationResponse.builder()
+                    .accessToken(jwtToken)
+                    .refreshToken(refreshToken)
+                    .build(), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Exception occurred when try to register User : ", e);
+            try {
+                throw new UserNotFoundException(e.getMessage());
+            } catch (UserNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public ResponsePayload authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -64,11 +78,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
-        return AuthenticationResponse.builder()
+
+        return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
-                .build();
+                .build(), HttpStatus.OK);
     }
+
     @Override
     public void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()
