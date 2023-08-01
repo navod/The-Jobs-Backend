@@ -7,6 +7,7 @@ import com.example.thejobs.dto.auth.RegisterRequest;
 import com.example.thejobs.entity.Token;
 import com.example.thejobs.dto.enums.TokenType;
 import com.example.thejobs.entity.User;
+import com.example.thejobs.exception.BadRequestException;
 import com.example.thejobs.exception.UserNotFoundException;
 import com.example.thejobs.repo.TokenRepository;
 import com.example.thejobs.repo.UserRepository;
@@ -39,6 +40,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public ResponsePayload register(RegisterRequest request) {
         try {
+            log.info("register user request{}", request);
             User user = User.builder()
                     .firstname(request.getFirstname())
                     .lastname(request.getLastname())
@@ -66,23 +68,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public ResponsePayload authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-        var user = repository.findByEmail(request.getEmail())
-                .orElseThrow();
-        var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
-        revokeAllUserTokens(user);
-        saveUserToken(user, jwtToken);
+        log.info("login user request");
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+            var user = repository.findByEmail(request.getEmail())
+                    .orElseThrow();
+            var jwtToken = jwtService.generateToken(user);
+            var refreshToken = jwtService.generateRefreshToken(user);
+            revokeAllUserTokens(user);
+            saveUserToken(user, jwtToken);
 
-        return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), AuthenticationResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build(), HttpStatus.OK);
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), AuthenticationResponse.builder()
+                    .accessToken(jwtToken)
+                    .refreshToken(refreshToken)
+                    .build(), HttpStatus.OK);
+        }catch (BadRequestException e){
+            throw new BadRequestException();
+        }
     }
 
     @Override
