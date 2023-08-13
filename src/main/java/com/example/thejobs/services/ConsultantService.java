@@ -1,9 +1,9 @@
 package com.example.thejobs.services;
 
+import com.example.thejobs.advice.ResponsePayload;
 import com.example.thejobs.dto.ConsultantDTO;
-import org.springframework.http.ResponseEntity;
 
 public interface ConsultantService {
 
-    String registerConsulant(ConsultantDTO consultantDTO);
+    ResponsePayload registerConsultant(ConsultantDTO consultantDTO);
 }

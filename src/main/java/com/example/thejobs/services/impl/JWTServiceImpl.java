@@ -50,7 +50,10 @@ public class JWTServiceImpl implements JWTService {
             Map<String, Object> extraClaims,
             User userDetails
     ) {
-        extraClaims.put("userRole", userDetails.getRole());
+        extraClaims.put("role", userDetails.getRole());
+        extraClaims.put("firstname",userDetails.getFirstname());
+        extraClaims.put("lastname",userDetails.getLastname());
+        extraClaims.put("id",userDetails.getId());
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 

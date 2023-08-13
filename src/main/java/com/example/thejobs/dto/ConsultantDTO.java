@@ -47,7 +47,7 @@ public class ConsultantDTO {
     @NotNull
     @NotEmpty
     @NotBlank
-    private String county;
+    private String country;
 
     @Min(8)
     @NotNull

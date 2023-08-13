@@ -4,11 +4,13 @@ import com.example.thejobs.advice.ResponsePayload;
 import com.example.thejobs.dto.auth.AuthenticationRequest;
 import com.example.thejobs.dto.auth.AuthenticationResponse;
 import com.example.thejobs.dto.auth.RegisterRequest;
+import com.example.thejobs.entity.Consultant;
 import com.example.thejobs.entity.Token;
 import com.example.thejobs.dto.enums.TokenType;
 import com.example.thejobs.entity.User;
 import com.example.thejobs.exception.BadRequestException;
 import com.example.thejobs.exception.UserNotFoundException;
+import com.example.thejobs.repo.ConsultantRepository;
 import com.example.thejobs.repo.TokenRepository;
 import com.example.thejobs.repo.UserRepository;
 import com.example.thejobs.services.AuthenticationService;
@@ -26,6 +28,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,12 +40,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final ConsultantRepository consultantRepository;
 
     @Override
     public ResponsePayload register(RegisterRequest request) {
         try {
             log.info("register user request{}", request);
             User user = User.builder()
+                    .id(UUID.randomUUID().toString())
                     .firstname(request.getFirstname())
                     .lastname(request.getLastname())
                     .email(request.getEmail())
@@ -49,13 +55,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .role(request.getRole())
                     .build();
             var savedUser = repository.save(user);
-            var jwtToken = jwtService.generateToken(user);
-            var refreshToken = jwtService.generateRefreshToken(user);
-            saveUserToken(savedUser, jwtToken);
-            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), AuthenticationResponse.builder()
-                    .accessToken(jwtToken)
-                    .refreshToken(refreshToken)
-                    .build(), HttpStatus.OK);
+
+            if (user.getRole().toString().equals("USER")) {
+                var jwtToken = jwtService.generateToken(user);
+                var refreshToken = jwtService.generateRefreshToken(user);
+                saveUserToken(savedUser, jwtToken);
+                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), AuthenticationResponse.builder()
+                        .accessToken(jwtToken)
+                        .refreshToken(refreshToken)
+                        .build(), HttpStatus.OK);
+
+            } else {
+                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "User Added", HttpStatus.OK);
+            }
+
         } catch (Exception e) {
             log.error("Exception occurred when try to register User : ", e);
             try {
@@ -78,6 +91,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             );
             var user = repository.findByEmail(request.getEmail())
                     .orElseThrow();
+
+            if (user.getRole().equals("CONSULTANT")) {
+                var consultant = consultantRepository.findByEmail(request.getEmail());
+                user.setId(consultant.getId());
+
+            }
             var jwtToken = jwtService.generateToken(user);
             var refreshToken = jwtService.generateRefreshToken(user);
             revokeAllUserTokens(user);
@@ -87,7 +106,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)
                     .build(), HttpStatus.OK);
-        }catch (BadRequestException e){
+        } catch (BadRequestException e) {
             throw new BadRequestException();
         }
     }

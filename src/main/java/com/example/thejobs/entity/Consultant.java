@@ -20,10 +20,12 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "consultant")
-public class Consultant implements UserDetails {
+public class Consultant {
     @Id
     private String id;
+    @Column(nullable = false)
     private String jobType;
+    @Column(nullable = false)
     private String firstName;
     private String lastName;
     @Column(nullable = false, unique = true)
@@ -32,45 +34,12 @@ public class Consultant implements UserDetails {
     private String mobile;
     @Column(nullable = false, unique = true)
     private String nic;
-    private String county;
-    private String password;
+    @Column(nullable = false)
+    private String country;
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
-    @Override
-    public String getPassword() {
-        return this.password;
-    }
-
-    @Override
-    public String getUsername() {
-        return this.email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return false;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return false;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return false;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return false;
-    }
+    @Column(columnDefinition = "boolean default true")
+    private boolean status;
 
 
 }

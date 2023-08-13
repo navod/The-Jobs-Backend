@@ -41,6 +41,9 @@ dependencies {
 
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation "org.apache.commons:commons-lang3:3.12.0"
+    // https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+    implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.1.1'
+
 }
 
 tasks.named('test') {

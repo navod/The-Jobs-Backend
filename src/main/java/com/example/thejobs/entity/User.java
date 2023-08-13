@@ -22,12 +22,15 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue
-    private Integer id;
+    private String id;
+    @Column(nullable = false)
     private String firstname;
     private String lastname;
+    @Column(nullable = false, unique = true)
     private String email;
     private String password;
+    @Column(columnDefinition = "boolean default true")
+    private boolean status;
 
     @Enumerated(EnumType.STRING)
     private Role role;
