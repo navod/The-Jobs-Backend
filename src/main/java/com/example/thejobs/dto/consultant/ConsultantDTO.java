@@ -1,4 +1,4 @@
-package com.example.thejobs.dto;
+package com.example.thejobs.dto.consultant;
 
 import com.example.thejobs.dto.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -32,7 +34,7 @@ public class ConsultantDTO {
     @Email
     private String email;
 
-    @Pattern(regexp = "^\\d{10}$",message = "invalid mobile number entered ")
+    @Pattern(regexp = "^\\d{10}$", message = "invalid mobile number entered ")
 
     @NotNull
     @NotEmpty
@@ -56,4 +58,6 @@ public class ConsultantDTO {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    private List<TimeSlots> timeSlots;
 }

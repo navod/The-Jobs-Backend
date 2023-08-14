@@ -1,7 +1,7 @@
 package com.example.thejobs.controllers;
 
 import com.example.thejobs.advice.ResponsePayload;
-import com.example.thejobs.dto.ConsultantDTO;
+import com.example.thejobs.dto.consultant.ConsultantDTO;
 import com.example.thejobs.services.ConsultantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
