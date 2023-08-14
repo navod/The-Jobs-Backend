@@ -6,10 +6,7 @@ import com.example.thejobs.services.ConsultantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -25,5 +22,11 @@ public class ConsultantController {
     public ResponsePayload registerConsultant(@RequestBody @Valid ConsultantDTO consultantDTO) {
         log.info("consultant register method called {} name", consultantDTO.getFirstName());
         return consultantService.registerConsultant(consultantDTO);
+    }
+
+    @PutMapping("/update-consultant")
+    public ResponsePayload updateConsultant(@RequestBody @Valid ConsultantDTO consultantDTO) {
+        log.info("consultant update method called {} name", consultantDTO.getFirstName());
+        return consultantService.updateConsultant(consultantDTO);
     }
 }

@@ -26,4 +26,5 @@ public class Availability {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "consultant_id", referencedColumnName = "id", nullable = false)
     public Consultant consultant;
+    private boolean status;
 }

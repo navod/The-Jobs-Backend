@@ -6,8 +6,10 @@ import com.example.thejobs.dto.consultant.ConsultantDTO;
 import com.example.thejobs.dto.consultant.TimeSlots;
 import com.example.thejobs.entity.Availability;
 import com.example.thejobs.entity.Consultant;
+import com.example.thejobs.entity.User;
 import com.example.thejobs.repo.AvailabilityRepository;
 import com.example.thejobs.repo.ConsultantRepository;
+import com.example.thejobs.repo.UserRepository;
 import com.example.thejobs.services.AuthenticationService;
 import com.example.thejobs.services.ConsultantService;
 import com.example.thejobs.utility.Utility;
@@ -16,11 +18,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -35,6 +39,8 @@ public class ConsultantServiceImpl implements ConsultantService {
     private final AuthenticationService authenticationService;
     private final AvailabilityRepository availabilityRepository;
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -42,9 +48,11 @@ public class ConsultantServiceImpl implements ConsultantService {
         log.info("consultant register impl-method called {} name", consultantDTO.getFirstName());
         try {
             Consultant consultant = modelMapper.map(consultantDTO, Consultant.class);
-            consultant.setId(UUID.randomUUID().toString());
-
+            String userId = UUID.randomUUID().toString();
+            consultant.setId(userId);
+            consultant.setStatus(true);
             RegisterRequest register = modelMapper.map(consultantDTO, RegisterRequest.class);
+            register.setId(userId);
             ResponsePayload regRes = authenticationService.register(register);
 
             if (regRes.getStatus() == HttpStatus.OK) {
@@ -65,8 +73,6 @@ public class ConsultantServiceImpl implements ConsultantService {
 
                     timeSlotsDTO.add(av);
                 }
-
-
                 availabilityRepository.saveAll(timeSlotsDTO);
             } else {
                 log.info(regRes.getMessage());
@@ -77,6 +83,47 @@ public class ConsultantServiceImpl implements ConsultantService {
             return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "consultant added", HttpStatus.CREATED);
         } catch (Exception e) {
             log.info("Error in register consultant method");
+            return new ResponsePayload(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ResponsePayload updateConsultant(ConsultantDTO consultantDTO) {
+        log.info("consultant update impl-method called {} name", consultantDTO.getFirstName());
+        try {
+
+            Optional<Consultant> existConsultant = consultantRepository.findById(consultantDTO.getId());
+            Optional<User> existUser = userRepository.findById(consultantDTO.getId());
+
+            if (existConsultant.isPresent() && existUser.isPresent()) {
+                Consultant consultant = modelMapper.map(consultantDTO, Consultant.class);
+                consultant.setStatus(true);
+                consultantRepository.save(consultant);
+
+                List<Availability> timeSlotsDTO = new ArrayList<>();
+
+
+                for (TimeSlots slot : consultantDTO.getTimeSlots()) {
+                    Availability av = Availability.builder()
+                            .id(slot.getId())
+                            .day(slot.getDay())
+                            .endTime((slot.getEndTime()))
+                            .startTime(slot.getStartTime())
+                            .timeSlots(objectMapper.writeValueAsString(Utility.generateValues(slot.getStartTime(), slot.getEndTime())))
+                            .status(slot.isStatus())
+                            .consultant(consultant)
+                            .build();
+
+                    timeSlotsDTO.add(av);
+                }
+                availabilityRepository.saveAll(timeSlotsDTO);
+
+            }
+
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "consultant updated", HttpStatus.CREATED);
+        } catch (Exception e) {
+            log.error("Error in update consultant method");
             return new ResponsePayload(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

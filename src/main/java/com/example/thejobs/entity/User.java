@@ -23,13 +23,10 @@ public class User implements UserDetails {
 
     @Id
     private String id;
-    @Column(nullable = false)
-    private String firstname;
-    private String lastname;
     @Column(nullable = false, unique = true)
     private String email;
     private String password;
-    @Column(columnDefinition = "boolean default true")
+    @Column(columnDefinition = "boolean default 1")
     private boolean status;
 
     @Enumerated(EnumType.STRING)

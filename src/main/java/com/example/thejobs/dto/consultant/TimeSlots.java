@@ -25,7 +25,8 @@ public class TimeSlots {
     private DAYS day;
     private String startTime;
     private String endTime;
-
+    private Integer id;
+    private boolean status;
 
 
 }

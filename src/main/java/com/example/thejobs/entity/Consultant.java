@@ -38,7 +38,7 @@ public class Consultant {
     private String country;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @Column(columnDefinition = "boolean default true")
+    @Column(columnDefinition = "boolean default 1")
     private boolean status;
 
 

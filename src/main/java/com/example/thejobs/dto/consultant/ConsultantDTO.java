@@ -52,9 +52,6 @@ public class ConsultantDTO {
     private String country;
 
     @Min(8)
-    @NotNull
-    @NotEmpty
-    @NotBlank
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;

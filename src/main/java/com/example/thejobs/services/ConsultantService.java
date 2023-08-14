@@ -8,4 +8,5 @@ public interface ConsultantService {
     ResponsePayload registerConsultant(ConsultantDTO consultantDTO);
 
 
+    ResponsePayload updateConsultant(ConsultantDTO consultantDTO);
 }

@@ -47,11 +47,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         try {
             log.info("register user request{}", request);
             User user = User.builder()
-                    .id(UUID.randomUUID().toString())
-                    .firstname(request.getFirstname())
-                    .lastname(request.getLastname())
+                    .id(request.getId() != null ? request.getId() : UUID.randomUUID().toString())
                     .email(request.getEmail())
                     .password(passwordEncoder.encode(request.getPassword()))
+                    .status(true)
                     .role(request.getRole())
                     .build();
             var savedUser = repository.save(user);
