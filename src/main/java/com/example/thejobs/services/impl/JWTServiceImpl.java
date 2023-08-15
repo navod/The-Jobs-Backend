@@ -50,14 +50,23 @@ public class JWTServiceImpl implements JWTService {
             Map<String, Object> extraClaims,
             User userDetails
     ) {
-        extraClaims.put("userRole", userDetails.getRole());
+        extraClaims.put("role", userDetails.getRole());
+        extraClaims.put("id",userDetails.getId());
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
     @Override
+    public String generateRefreshToken(User userDetails) {
+        return generateToken(new HashMap<>(), userDetails);
+    }
+
+    @Override
     public String generateRefreshToken(
-            UserDetails userDetails
+            Map<String, Object> extraClaims,
+            User userDetails
     ) {
+        extraClaims.put("role", userDetails.getRole());
+        extraClaims.put("id",userDetails.getId());
         return buildToken(new HashMap<>(), userDetails, refreshExpiration);
     }
 
