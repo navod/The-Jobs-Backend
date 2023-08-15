@@ -20,8 +20,11 @@ public interface JWTService {
             User userDetails
     );
 
+    String generateRefreshToken(User userDetails);
+
     String generateRefreshToken(
-            UserDetails userDetails
+            Map<String, Object> extraClaims,
+            User userDetails
     );
 
 

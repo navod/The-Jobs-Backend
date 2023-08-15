@@ -1,11 +1,16 @@
 package com.example.thejobs.services.impl;
 
+import com.example.thejobs.advice.ResponsePayload;
 import com.example.thejobs.dto.auth.AuthenticationRequest;
 import com.example.thejobs.dto.auth.AuthenticationResponse;
 import com.example.thejobs.dto.auth.RegisterRequest;
+import com.example.thejobs.entity.Consultant;
 import com.example.thejobs.entity.Token;
 import com.example.thejobs.dto.enums.TokenType;
 import com.example.thejobs.entity.User;
+import com.example.thejobs.exception.BadRequestException;
+import com.example.thejobs.exception.UserNotFoundException;
+import com.example.thejobs.repo.ConsultantRepository;
 import com.example.thejobs.repo.TokenRepository;
 import com.example.thejobs.repo.UserRepository;
 import com.example.thejobs.services.AuthenticationService;
@@ -14,61 +19,97 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final ConsultantRepository consultantRepository;
 
     @Override
-    public AuthenticationResponse register(RegisterRequest request) {
-        User user = User.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .build();
-        var savedUser = repository.save(user);
-        var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
-        saveUserToken(savedUser, jwtToken);
-        return AuthenticationResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
+    public ResponsePayload register(RegisterRequest request) {
+        try {
+            log.info("register user request{}", request);
+            User user = User.builder()
+                    .id(request.getId() != null ? request.getId() : UUID.randomUUID().toString())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .status(true)
+                    .role(request.getRole())
+                    .build();
+            var savedUser = repository.save(user);
+
+            if (user.getRole().toString().equals("USER")) {
+                var jwtToken = jwtService.generateToken(user);
+                var refreshToken = jwtService.generateRefreshToken(user);
+                saveUserToken(savedUser, jwtToken);
+                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), AuthenticationResponse.builder()
+                        .accessToken(jwtToken)
+                        .refreshToken(refreshToken)
+                        .build(), HttpStatus.OK);
+
+            } else {
+                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "User Added", HttpStatus.OK);
+            }
+
+        } catch (Exception e) {
+            log.error("Exception occurred when try to register User : ", e);
+            try {
+                throw new UserNotFoundException(e.getMessage());
+            } catch (UserNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
     }
 
     @Override
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-        var user = repository.findByEmail(request.getEmail())
-                .orElseThrow();
-        var jwtToken = jwtService.generateToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
-        revokeAllUserTokens(user);
-        saveUserToken(user, jwtToken);
-        return AuthenticationResponse.builder()
-                .accessToken(jwtToken)
-                .refreshToken(refreshToken)
-                .build();
+    public ResponsePayload authenticate(AuthenticationRequest request) {
+        log.info("login user request");
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+            var user = repository.findByEmail(request.getEmail())
+                    .orElseThrow();
+
+            if (user.getRole().equals("CONSULTANT")) {
+                var consultant = consultantRepository.findByEmail(request.getEmail());
+                user.setId(consultant.getId());
+
+            }
+            var jwtToken = jwtService.generateToken(user);
+            var refreshToken = jwtService.generateRefreshToken(user);
+            revokeAllUserTokens(user);
+            saveUserToken(user, jwtToken);
+
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), AuthenticationResponse.builder()
+                    .accessToken(jwtToken)
+                    .refreshToken(refreshToken)
+                    .build(), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            throw new BadRequestException();
+        }
     }
+
     @Override
     public void saveUserToken(User user, String jwtToken) {
         var token = Token.builder()
