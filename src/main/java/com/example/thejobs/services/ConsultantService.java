@@ -9,4 +9,10 @@ public interface ConsultantService {
 
 
     ResponsePayload updateConsultant(ConsultantDTO consultantDTO);
+
+    ResponsePayload getAllConsultants();
+
+    ResponsePayload deactivateConsultant(String id, boolean status);
+
+    ResponsePayload deleteConsultant(String id);
 }

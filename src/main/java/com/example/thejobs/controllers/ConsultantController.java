@@ -29,4 +29,22 @@ public class ConsultantController {
         log.info("consultant update method called {} name", consultantDTO.getFirstName());
         return consultantService.updateConsultant(consultantDTO);
     }
+
+    @GetMapping("/get-all")
+    public ResponsePayload getAllConsultants() {
+        log.info("consultant get method called");
+        return consultantService.getAllConsultants();
+    }
+
+    @PutMapping("/activation")
+    public ResponsePayload deactivateConsultant(@RequestParam String id,boolean status) {
+        log.info("consultant activation method called");
+        return consultantService.deactivateConsultant(id,status);
+    }
+
+    @DeleteMapping("/delete-consultant")
+    public ResponsePayload deleteConsultant(@RequestParam String id) {
+        log.info("consultant delete method called");
+        return consultantService.deleteConsultant(id);
+    }
 }

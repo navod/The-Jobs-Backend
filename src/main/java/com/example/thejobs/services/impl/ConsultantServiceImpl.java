@@ -3,6 +3,7 @@ package com.example.thejobs.services.impl;
 import com.example.thejobs.advice.ResponsePayload;
 import com.example.thejobs.dto.auth.RegisterRequest;
 import com.example.thejobs.dto.consultant.ConsultantDTO;
+import com.example.thejobs.dto.consultant.ConsultantRequestDTO;
 import com.example.thejobs.dto.consultant.TimeSlots;
 import com.example.thejobs.entity.Availability;
 import com.example.thejobs.entity.Consultant;
@@ -31,7 +32,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-
 public class ConsultantServiceImpl implements ConsultantService {
 
     private final ConsultantRepository consultantRepository;
@@ -125,6 +125,57 @@ public class ConsultantServiceImpl implements ConsultantService {
         } catch (Exception e) {
             log.error("Error in update consultant method");
             return new ResponsePayload(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public ResponsePayload getAllConsultants() {
+        List<ConsultantRequestDTO> consultantRequestDTOS = new ArrayList<>();
+        List<Consultant> all = consultantRepository.findAll();
+
+        for (Consultant dto : all) {
+            ConsultantDTO consultantDTO = modelMapper.map(dto, ConsultantDTO.class);
+            List<Availability> byConsultantId = availabilityRepository.findByConsultantId(dto.getId());
+            consultantRequestDTOS.add(new ConsultantRequestDTO(consultantDTO, byConsultantId));
+        }
+        return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), consultantRequestDTOS, HttpStatus.OK);
+    }
+
+    @Transactional
+    @Override
+    public ResponsePayload deactivateConsultant(String id, boolean status) {
+        log.error("User consultant-impl activation method {}", id);
+        Optional<Consultant> consultants = consultantRepository.findById(id);
+        Optional<User> users = userRepository.findById(id);
+        if (consultants.isPresent() && users.isPresent()) {
+            Consultant consultant = consultants.get();
+            consultant.setStatus(status);
+            consultantRepository.save(consultant);
+
+            User user = users.get();
+            user.setStatus(status);
+            userRepository.save(user);
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "user successfully updated", HttpStatus.OK);
+        } else {
+            return new ResponsePayload(HttpStatus.BAD_REQUEST.getReasonPhrase(), "user does not exists", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponsePayload deleteConsultant(String id) {
+        Optional<Consultant> consultants = consultantRepository.findById(id);
+        Optional<User> users = userRepository.findById(id);
+
+        if (consultants.isPresent() && users.isPresent()) {
+            Consultant consultant = consultants.get();
+            User user = users.get();
+
+            consultantRepository.delete(consultant);
+            userRepository.delete(user);
+
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "user successfully deleted", HttpStatus.OK);
+        } else {
+            return new ResponsePayload(HttpStatus.BAD_REQUEST.getReasonPhrase(), "user does not exists", HttpStatus.BAD_REQUEST);
         }
     }
 }
