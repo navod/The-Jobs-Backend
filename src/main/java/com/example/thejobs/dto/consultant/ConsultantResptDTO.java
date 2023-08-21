@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties
-public class ConsultantRequestDTO {
+public class ConsultantResptDTO {
     private ConsultantDTO consultant;
     private List<Availability> availabilities;
 }
