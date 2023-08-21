@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.http.MatcherType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MvcResult;
@@ -49,8 +50,6 @@ class AuthenticationControllerTest extends AbstractTest {
     @Test
     void testRegister() throws Exception {
         User user = User.builder()
-                .firstname("navod")
-                .lastname("perera")
                 .email("navod@gmail.com")
                 .password("42434343434")
                 .role(Role.valueOf("USER"))
@@ -69,7 +68,7 @@ class AuthenticationControllerTest extends AbstractTest {
         when(jwtService.generateRefreshToken(user)).thenReturn("134343434343");
         when(tokenRepository.save(token)).thenReturn(any());
 
-        RegisterRequest request = new RegisterRequest(user.getFirstname(), user.getLastname(), user.getEmail(), user.getPassword(),
+        RegisterRequest request = new RegisterRequest("12", user.getEmail(), user.getPassword(),
                 user.getRole());
 
         String inputJson = super.mapToJson(request);
@@ -78,9 +77,10 @@ class AuthenticationControllerTest extends AbstractTest {
 
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
         ObjectMapper mapper = new ObjectMapper();
-        AuthenticationResponse authenticationResponse = mapper.readValue(mvcResult.getResponse().getContentAsString(), AuthenticationResponse.class);
+        ResponseEntity responseEntity = mapper.readValue(mvcResult.getResponse().getContentAsString(), ResponseEntity.class);
 
-        assertEquals(200, mvcResult.getResponse().getStatus());
+
+        assertEquals("OK", mvcResult.getResponse().getStatus());
     }
 
 

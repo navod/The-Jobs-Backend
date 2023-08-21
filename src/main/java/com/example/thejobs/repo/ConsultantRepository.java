@@ -12,4 +12,8 @@ public interface ConsultantRepository extends JpaRepository<Consultant, String> 
 
     Consultant findByEmail(String email);
 
+    Consultant findByCountryAndJobType(String country, String jobType);
+
+    Consultant findByCountry(String country);
+
 }

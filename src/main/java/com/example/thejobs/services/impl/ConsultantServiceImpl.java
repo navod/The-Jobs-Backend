@@ -3,7 +3,7 @@ package com.example.thejobs.services.impl;
 import com.example.thejobs.advice.ResponsePayload;
 import com.example.thejobs.dto.auth.RegisterRequest;
 import com.example.thejobs.dto.consultant.ConsultantDTO;
-import com.example.thejobs.dto.consultant.ConsultantRequestDTO;
+import com.example.thejobs.dto.consultant.ConsultantResptDTO;
 import com.example.thejobs.dto.consultant.TimeSlots;
 import com.example.thejobs.entity.Availability;
 import com.example.thejobs.entity.Consultant;
@@ -130,13 +130,13 @@ public class ConsultantServiceImpl implements ConsultantService {
 
     @Override
     public ResponsePayload getAllConsultants() {
-        List<ConsultantRequestDTO> consultantRequestDTOS = new ArrayList<>();
+        List<ConsultantResptDTO> consultantRequestDTOS = new ArrayList<>();
         List<Consultant> all = consultantRepository.findAll();
 
         for (Consultant dto : all) {
             ConsultantDTO consultantDTO = modelMapper.map(dto, ConsultantDTO.class);
             List<Availability> byConsultantId = availabilityRepository.findByConsultantId(dto.getId());
-            consultantRequestDTOS.add(new ConsultantRequestDTO(consultantDTO, byConsultantId));
+            consultantRequestDTOS.add(new ConsultantResptDTO(consultantDTO, byConsultantId));
         }
         return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), consultantRequestDTOS, HttpStatus.OK);
     }
