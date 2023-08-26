@@ -4,4 +4,6 @@ import com.example.thejobs.entity.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
+
+    Booking findBookingByDate(String date);
 }

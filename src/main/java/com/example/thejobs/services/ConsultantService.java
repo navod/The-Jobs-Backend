@@ -15,4 +15,6 @@ public interface ConsultantService {
     ResponsePayload deactivateConsultant(String id, boolean status);
 
     ResponsePayload deleteConsultant(String id);
+
+    ResponsePayload getAvailabilityByDate(String id, String date);
 }

@@ -52,7 +52,7 @@ public class ConsultantDTO {
     @NotBlank
     private String country;
 
-    @Min(8)
+    @Size(min = 8, message = "Password must have at least 8 characters")
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;

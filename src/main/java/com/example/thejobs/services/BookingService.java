@@ -8,4 +8,10 @@ public interface BookingService {
     ResponsePayload saveBooking(JobSeekerDTO jobSeekerDTO);
 
     ResponsePayload acceptBooking(BookingDTO bookingDTO);
+
+    ResponsePayload getAllBooking();
+
+    ResponsePayload rejectBooking(BookingDTO bookingDTO);
+
+    ResponsePayload completeBooking(int id);
 }
