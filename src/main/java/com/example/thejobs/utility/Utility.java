@@ -47,4 +47,18 @@ public class Utility {
         Locale locale = Locale.getDefault();
         return DAYS.valueOf(dayOfWeek.getDisplayName(TextStyle.FULL, locale).toUpperCase());
     }
+
+    public static String formatDateTime(String dateTime,String currentPattern,String formatPattern) {
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat(currentPattern);
+            Date date = inputFormat.parse(dateTime);
+
+            SimpleDateFormat outputFormat = new SimpleDateFormat(formatPattern);
+
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return "error";
+        }
+    }
 }
