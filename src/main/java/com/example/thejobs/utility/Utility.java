@@ -1,12 +1,17 @@
 package com.example.thejobs.utility;
 
+import com.example.thejobs.dto.enums.DAYS;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class Utility {
@@ -34,5 +39,26 @@ public class Utility {
         }
 
 
+    }
+
+    public static DAYS getDayName(String date) {
+        LocalDate localDate = LocalDate.of(Integer.parseInt(date.split("-")[0]), Integer.parseInt(date.split("-")[1]), Integer.parseInt(date.split("-")[2]));
+        DayOfWeek dayOfWeek = localDate.getDayOfWeek();
+        Locale locale = Locale.getDefault();
+        return DAYS.valueOf(dayOfWeek.getDisplayName(TextStyle.FULL, locale).toUpperCase());
+    }
+
+    public static String formatDateTime(String dateTime,String currentPattern,String formatPattern) {
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat(currentPattern);
+            Date date = inputFormat.parse(dateTime);
+
+            SimpleDateFormat outputFormat = new SimpleDateFormat(formatPattern);
+
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return "error";
+        }
     }
 }

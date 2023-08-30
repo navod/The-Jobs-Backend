@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -51,10 +52,14 @@ public class ConsultantDTO {
     @NotBlank
     private String country;
 
-    @Min(8)
+    @Size(min = 8, message = "Password must have at least 8 characters")
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
 
     private List<TimeSlots> timeSlots;
+
+    private boolean status;
+
+    private Date createdDate;
 }
