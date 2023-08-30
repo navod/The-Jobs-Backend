@@ -1,15 +1,15 @@
 package com.example.thejobs.services.impl;
 
 import com.example.thejobs.advice.ResponsePayload;
+import com.example.thejobs.dto.BookingDTO;
+import com.example.thejobs.dto.BookingResponseDTO;
+import com.example.thejobs.dto.JobSeekerDTO;
 import com.example.thejobs.dto.auth.RegisterRequest;
 import com.example.thejobs.dto.consultant.ConsultantDTO;
 import com.example.thejobs.dto.consultant.ConsultantRespDTO;
 import com.example.thejobs.dto.consultant.TimeSlots;
 import com.example.thejobs.dto.enums.DAYS;
-import com.example.thejobs.entity.Availability;
-import com.example.thejobs.entity.Booking;
-import com.example.thejobs.entity.Consultant;
-import com.example.thejobs.entity.User;
+import com.example.thejobs.entity.*;
 import com.example.thejobs.repo.AvailabilityRepository;
 import com.example.thejobs.repo.BookingRepository;
 import com.example.thejobs.repo.ConsultantRepository;
@@ -210,5 +210,30 @@ public class ConsultantServiceImpl implements ConsultantService {
         } else {
             return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), emp, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Override
+    public ResponsePayload getMyBooking(String id) {
+        Consultant consultant = Consultant.builder().id(id).build();
+        List<Booking> bookings = bookingRepository.findBookingByConsultantId(consultant);
+
+        List<BookingResponseDTO> bookingResponseDTO = new ArrayList<>();
+
+        for (Booking dto : bookings) {
+            Consultant consultantEntity = dto.getConsultantId();
+            JobSeeker jobSeeker = dto.getJobSeekerId();
+            ConsultantDTO consultantDTO = modelMapper.map(consultantEntity, ConsultantDTO.class);
+            BookingDTO booking = modelMapper.map(dto, BookingDTO.class);
+            JobSeekerDTO jobSeekerDTO = modelMapper.map(jobSeeker, JobSeekerDTO.class);
+            BookingResponseDTO brd = BookingResponseDTO.builder()
+                    .consultant(consultantDTO)
+                    .booking(booking)
+                    .jobSeeker(jobSeekerDTO)
+                    .build();
+
+            bookingResponseDTO.add(brd);
+        }
+
+        return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), bookingResponseDTO, HttpStatus.OK);
     }
 }

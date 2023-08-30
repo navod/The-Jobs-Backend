@@ -36,6 +36,12 @@ public class ConsultantController {
         return consultantService.getAllConsultants();
     }
 
+    @GetMapping("/get-my-booking")
+    public ResponsePayload getMyBooking(@RequestParam String id) {
+        log.info("consultant get my booking method called");
+        return consultantService.getMyBooking(id);
+    }
+
     @PutMapping("/activation")
     public ResponsePayload deactivateConsultant(@RequestParam String id, boolean status) {
         log.info("consultant activation method called");
@@ -53,4 +59,5 @@ public class ConsultantController {
         log.info("get availability by date method called");
         return consultantService.getAvailabilityByDate(id, date);
     }
+
 }
