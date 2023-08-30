@@ -55,7 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .build();
             var savedUser = repository.save(user);
 
-            if (user.getRole().toString().equals("USER")) {
+            if (user.getRole().toString().equals("ADMIN")) {
                 var jwtToken = jwtService.generateToken(user);
                 var refreshToken = jwtService.generateRefreshToken(user);
                 saveUserToken(savedUser, jwtToken);

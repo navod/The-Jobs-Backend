@@ -52,7 +52,7 @@ class AuthenticationControllerTest extends AbstractTest {
         User user = User.builder()
                 .email("navod@gmail.com")
                 .password("42434343434")
-                .role(Role.valueOf("USER"))
+                .role(Role.valueOf("ADMIN"))
                 .build();
 
         var token = Token.builder()

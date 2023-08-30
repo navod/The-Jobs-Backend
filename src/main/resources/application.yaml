@@ -9,6 +9,20 @@ spring:
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: navodsachintha@gmail.com
+    password: grjjecghyatsszzm
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+
 application:
   security:
     jwt:

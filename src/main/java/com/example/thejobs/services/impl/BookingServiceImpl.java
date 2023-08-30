@@ -12,6 +12,8 @@ import com.example.thejobs.repo.BookingRepository;
 import com.example.thejobs.repo.ConsultantRepository;
 import com.example.thejobs.repo.JobSeekerRepository;
 import com.example.thejobs.services.BookingService;
+import com.example.thejobs.services.NotificationService;
+import com.example.thejobs.utility.Utility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -30,46 +32,60 @@ public class BookingServiceImpl implements BookingService {
     private final ModelMapper modelMapper;
     private final ConsultantRepository consultantRepository;
     private final BookingRepository bookingRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
     public ResponsePayload saveBooking(JobSeekerDTO jobSeekerDTO) {
-        com.example.thejobs.entity.JobSeeker jobSeeker = modelMapper.map(jobSeekerDTO, com.example.thejobs.entity.JobSeeker.class);
+        JobSeeker jobSeeker = modelMapper.map(jobSeekerDTO, com.example.thejobs.entity.JobSeeker.class);
         jobSeeker.setId(UUID.randomUUID().toString());
-        com.example.thejobs.entity.JobSeeker saveJobSeeker = jobSeekerRepository.save(jobSeeker);
-        com.example.thejobs.entity.Consultant consultant = consultantRepository.findByCountryAndJobType(jobSeeker.getPreferDestination(), jobSeekerDTO.getPreferJobType());
+        JobSeeker saveJobSeeker = jobSeekerRepository.save(jobSeeker);
+        Consultant consultant = consultantRepository.findByCountryAndJobType(jobSeeker.getPreferDestination(), jobSeekerDTO.getPreferJobType());
         if (consultant == null) {
             consultant = consultantRepository.findByCountry(consultant.getCountry());
         }
 
-        com.example.thejobs.entity.Booking booking = com.example.thejobs.entity.Booking.builder()
+        Booking booking = com.example.thejobs.entity.Booking.builder()
                 .jobSeekerId(saveJobSeeker)
                 .consultantId(consultant)
                 .status("PENDING")
                 .build();
 
         bookingRepository.save(booking);
-        return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "Booking Added", HttpStatus.OK);
 
+        ResponsePayload responsePayload = sendBookingPendingEmail(saveJobSeeker);
+
+        if (responsePayload.getStatus() == HttpStatus.OK) {
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "Booking Added", HttpStatus.OK);
+        } else {
+            return new ResponsePayload(HttpStatus.BAD_REQUEST.getReasonPhrase(), "Not Trigger booking save Email", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override
     public ResponsePayload acceptBooking(BookingDTO bookingDTO) {
         Optional<Booking> isBooking = bookingRepository.findById(bookingDTO.getId());
-
         if (isBooking.isPresent()) {
             Booking booking = isBooking.get();
-
+            JobSeeker jobSeeker = jobSeekerRepository.findById(booking.getJobSeekerId().getId()).get();
             booking.setDate(bookingDTO.getDate());
             booking.setStatus("APPROVED");
             booking.setTime(bookingDTO.getTime());
             booking.setSpecialNote(bookingDTO.getSpecialNote());
 
             bookingRepository.save(booking);
+
+            ResponsePayload responsePayload = sendBookingConfirmEmail(jobSeeker, booking);
+
+            if (responsePayload.getStatus() == HttpStatus.OK) {
+                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "Booking Accepted", HttpStatus.OK);
+            } else {
+                return new ResponsePayload(HttpStatus.BAD_REQUEST.getReasonPhrase(), "Not Trigger booking Confirmatio email", HttpStatus.BAD_REQUEST);
+            }
+
         } else {
-            return new ResponsePayload(HttpStatus.BAD_REQUEST.getReasonPhrase(), "Booking id does not exists", HttpStatus.OK);
+            return new ResponsePayload(HttpStatus.BAD_REQUEST.getReasonPhrase(), "Booking id does not exists", HttpStatus.BAD_REQUEST);
         }
-        return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "Booking Accepted", HttpStatus.OK);
 
     }
 
@@ -129,6 +145,21 @@ public class BookingServiceImpl implements BookingService {
         }
         return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), bookingResponseDTO, HttpStatus.OK);
 
+    }
+
+    private ResponsePayload sendBookingConfirmEmail(JobSeeker jobSeeker, Booking booking) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("name", jobSeeker.getFirstName().toUpperCase() + " " + jobSeeker.getLastName().toUpperCase());
+        model.put("date", Utility.formatDateTime(booking.getDate(), "yyyy-MM-dd", "dd MMM, yyyy"));
+        model.put("time", Utility.formatDateTime(booking.getTime(), "HH:mm", "h . mm a"));
+        model.put("additionDetails", booking.getSpecialNote());
+        return notificationService.sendBookingConfirmEmail(jobSeeker.getEmail(), model);
+    }
+
+    private ResponsePayload sendBookingPendingEmail(JobSeeker jobSeeker) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("name", jobSeeker.getFirstName().toUpperCase() + " " + jobSeeker.getLastName().toUpperCase());
+        return notificationService.sendBookingPendingEmail(jobSeeker.getEmail(), model);
     }
 
 }
