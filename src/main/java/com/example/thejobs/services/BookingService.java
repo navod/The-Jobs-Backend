@@ -14,4 +14,5 @@ public interface BookingService {
     ResponsePayload rejectBooking(BookingDTO bookingDTO);
 
     ResponsePayload completeBooking(int id);
+
 }
