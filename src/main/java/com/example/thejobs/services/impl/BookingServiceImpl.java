@@ -127,8 +127,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public ResponsePayload getAllBooking() {
-        List<com.example.thejobs.entity.Booking> all = bookingRepository.findAll();
+    public ResponsePayload getAllBooking(String status) {
+        List<Booking> all;
+        if(status.equals("All")){
+            all = bookingRepository.findAll();
+        }else{
+            all = bookingRepository.findBookingByStatus(status);
+        }
+
         List<BookingResponseDTO> bookingResponseDTO = new ArrayList<>();
         for (Booking dto : all) {
             Consultant consultant = dto.getConsultantId();

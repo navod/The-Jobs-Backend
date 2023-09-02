@@ -26,4 +26,11 @@ public class DashboardController {
         log.info("get consultant analytics method called");
         return dashboardService.getDashboardAnalytics(id);
     }
+
+
+    @GetMapping("/get-main-analytics")
+    public ResponsePayload getMainAnalytics() throws JsonProcessingException {
+        log.info("get main analytics method called");
+        return dashboardService.getMainAnalytics();
+    }
 }
