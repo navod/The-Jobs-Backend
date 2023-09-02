@@ -39,6 +39,7 @@ public class BookingServiceImpl implements BookingService {
     public ResponsePayload saveBooking(JobSeekerDTO jobSeekerDTO) {
         JobSeeker jobSeeker = modelMapper.map(jobSeekerDTO, com.example.thejobs.entity.JobSeeker.class);
         jobSeeker.setId(UUID.randomUUID().toString());
+        jobSeeker.setCreatedDate(Calendar.getInstance().getTime());
         JobSeeker saveJobSeeker = jobSeekerRepository.save(jobSeeker);
         Consultant consultant = consultantRepository.findByCountryAndJobType(jobSeeker.getPreferDestination(), jobSeekerDTO.getPreferJobType());
         if (consultant == null) {

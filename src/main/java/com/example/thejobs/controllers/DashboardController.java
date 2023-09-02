@@ -26,14 +26,4 @@ public class DashboardController {
         log.info("get consultant analytics method called");
         return dashboardService.getDashboardAnalytics(id);
     }
-
-    @GetMapping("/hello")
-    public ResponsePayload hello(@RequestParam String id) {
-        log.info("get consultant analytics method called");
-        return new ResponsePayload(HttpStatus.OK.getReasonPhrase(),"OK" ,HttpStatus.OK);
-    }
-
-
-
-
 }

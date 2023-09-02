@@ -28,7 +28,8 @@ public class SecurityConfiguration {
 
     private final String[] list = {
             "/api/v1/auth/**",
-            "/api/v1/booking/register"
+            "/api/v1/booking/register",
+            "/api/v1/main-user/register"
     };
 
     @Bean

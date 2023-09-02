@@ -8,6 +8,7 @@ import com.example.thejobs.entity.Booking;
 import com.example.thejobs.entity.Consultant;
 import com.example.thejobs.repo.BookingRepository;
 import com.example.thejobs.services.DashboardService;
+import com.example.thejobs.utility.Utility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,7 +18,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 @Service
@@ -51,7 +54,8 @@ public class DashboardServiceImpl implements DashboardService {
         int totalRejectBookings = bookingRepository.getTotalRejectBookings(consultantId);
 
         Consultant consultant = Consultant.builder().id(consultantId).build();
-        List<Booking> todayBookingDetails = bookingRepository.findBookingByConsultantIdAndStatusAndDate(consultant,"APPROVED","2023-09-11");
+
+        List<Booking> todayBookingDetails = bookingRepository.findBookingByConsultantIdAndStatusAndDate(consultant,"APPROVED",LocalDate.now().toString());
 
         List<BookingResponseDTO> bookingDTO = new ArrayList<>();
 
