@@ -129,7 +129,7 @@ public class BookingServiceImpl implements BookingService {
     public ResponsePayload getAllBooking() {
         List<com.example.thejobs.entity.Booking> all = bookingRepository.findAll();
         List<BookingResponseDTO> bookingResponseDTO = new ArrayList<>();
-        for (com.example.thejobs.entity.Booking dto : all) {
+        for (Booking dto : all) {
             Consultant consultant = dto.getConsultantId();
             JobSeeker jobSeeker = dto.getJobSeekerId();
             ConsultantDTO consultantDTO = modelMapper.map(consultant, ConsultantDTO.class);

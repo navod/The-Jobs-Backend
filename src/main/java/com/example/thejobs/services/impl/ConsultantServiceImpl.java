@@ -1,15 +1,15 @@
 package com.example.thejobs.services.impl;
 
 import com.example.thejobs.advice.ResponsePayload;
+import com.example.thejobs.dto.BookingDTO;
+import com.example.thejobs.dto.BookingResponseDTO;
+import com.example.thejobs.dto.JobSeekerDTO;
 import com.example.thejobs.dto.auth.RegisterRequest;
 import com.example.thejobs.dto.consultant.ConsultantDTO;
 import com.example.thejobs.dto.consultant.ConsultantRespDTO;
 import com.example.thejobs.dto.consultant.TimeSlots;
 import com.example.thejobs.dto.enums.DAYS;
-import com.example.thejobs.entity.Availability;
-import com.example.thejobs.entity.Booking;
-import com.example.thejobs.entity.Consultant;
-import com.example.thejobs.entity.User;
+import com.example.thejobs.entity.*;
 import com.example.thejobs.repo.AvailabilityRepository;
 import com.example.thejobs.repo.BookingRepository;
 import com.example.thejobs.repo.ConsultantRepository;
@@ -48,7 +48,7 @@ public class ConsultantServiceImpl implements ConsultantService {
     public ResponsePayload registerConsultant(ConsultantDTO consultantDTO) {
         log.info("consultant register impl-method called {} name", consultantDTO.getFirstName());
         try {
-            com.example.thejobs.entity.Consultant consultant = modelMapper.map(consultantDTO, com.example.thejobs.entity.Consultant.class);
+            Consultant consultant = modelMapper.map(consultantDTO, Consultant.class);
             String userId = UUID.randomUUID().toString();
             consultant.setId(userId);
             consultant.setStatus(true);
@@ -58,7 +58,7 @@ public class ConsultantServiceImpl implements ConsultantService {
 
             if (regRes.getStatus() == HttpStatus.OK) {
                 log.info("saved consultant {} in user table", consultantDTO.getFirstName());
-                com.example.thejobs.entity.Consultant cons = consultantRepository.save(consultant);
+                Consultant cons = consultantRepository.save(consultant);
 
                 List<Availability> timeSlotsDTO = new ArrayList<>();
 
@@ -149,7 +149,7 @@ public class ConsultantServiceImpl implements ConsultantService {
         Optional<com.example.thejobs.entity.Consultant> consultants = consultantRepository.findById(id);
         Optional<User> users = userRepository.findById(id);
         if (consultants.isPresent() && users.isPresent()) {
-            com.example.thejobs.entity.Consultant consultant = consultants.get();
+            Consultant consultant = consultants.get();
             consultant.setStatus(status);
             consultantRepository.save(consultant);
 
@@ -209,6 +209,45 @@ public class ConsultantServiceImpl implements ConsultantService {
 
         } else {
             return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), emp, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponsePayload getMyBooking(String id) {
+        Consultant consultant = Consultant.builder().id(id).build();
+        List<Booking> bookings = bookingRepository.findBookingByConsultantId(consultant);
+
+        List<BookingResponseDTO> bookingResponseDTO = new ArrayList<>();
+
+        for (Booking dto : bookings) {
+            Consultant consultantEntity = dto.getConsultantId();
+            JobSeeker jobSeeker = dto.getJobSeekerId();
+            ConsultantDTO consultantDTO = modelMapper.map(consultantEntity, ConsultantDTO.class);
+            BookingDTO booking = modelMapper.map(dto, BookingDTO.class);
+            JobSeekerDTO jobSeekerDTO = modelMapper.map(jobSeeker, JobSeekerDTO.class);
+            BookingResponseDTO brd = BookingResponseDTO.builder()
+                    .consultant(consultantDTO)
+                    .booking(booking)
+                    .jobSeeker(jobSeekerDTO)
+                    .build();
+
+            bookingResponseDTO.add(brd);
+        }
+
+        return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), bookingResponseDTO, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponsePayload getConsultantDetails(String id) {
+        log.info("consultant details method called id {}", id);
+
+        Optional<Consultant> consultant = consultantRepository.findById(id);
+
+        if (consultant.isPresent()) {
+            Consultant consultant1 = consultant.get();
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), consultant1, HttpStatus.OK);
+        } else {
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), consultant, HttpStatus.BAD_REQUEST);
         }
     }
 }
