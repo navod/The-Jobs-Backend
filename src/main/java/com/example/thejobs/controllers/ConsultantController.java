@@ -60,4 +60,10 @@ public class ConsultantController {
         return consultantService.getAvailabilityByDate(id, date);
     }
 
+    @GetMapping("/get-consultant")
+    public ResponsePayload getConsultantDetails(@RequestParam String id) {
+        log.info("get consultant detail method called");
+        return consultantService.getConsultantDetails(id);
+    }
+
 }

@@ -48,7 +48,7 @@ public class ConsultantServiceImpl implements ConsultantService {
     public ResponsePayload registerConsultant(ConsultantDTO consultantDTO) {
         log.info("consultant register impl-method called {} name", consultantDTO.getFirstName());
         try {
-            com.example.thejobs.entity.Consultant consultant = modelMapper.map(consultantDTO, com.example.thejobs.entity.Consultant.class);
+            Consultant consultant = modelMapper.map(consultantDTO, Consultant.class);
             String userId = UUID.randomUUID().toString();
             consultant.setId(userId);
             consultant.setStatus(true);
@@ -58,7 +58,7 @@ public class ConsultantServiceImpl implements ConsultantService {
 
             if (regRes.getStatus() == HttpStatus.OK) {
                 log.info("saved consultant {} in user table", consultantDTO.getFirstName());
-                com.example.thejobs.entity.Consultant cons = consultantRepository.save(consultant);
+                Consultant cons = consultantRepository.save(consultant);
 
                 List<Availability> timeSlotsDTO = new ArrayList<>();
 
@@ -149,7 +149,7 @@ public class ConsultantServiceImpl implements ConsultantService {
         Optional<com.example.thejobs.entity.Consultant> consultants = consultantRepository.findById(id);
         Optional<User> users = userRepository.findById(id);
         if (consultants.isPresent() && users.isPresent()) {
-            com.example.thejobs.entity.Consultant consultant = consultants.get();
+            Consultant consultant = consultants.get();
             consultant.setStatus(status);
             consultantRepository.save(consultant);
 
@@ -235,5 +235,19 @@ public class ConsultantServiceImpl implements ConsultantService {
         }
 
         return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), bookingResponseDTO, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponsePayload getConsultantDetails(String id) {
+        log.info("consultant details method called id {}", id);
+
+        Optional<Consultant> consultant = consultantRepository.findById(id);
+
+        if (consultant.isPresent()) {
+            Consultant consultant1 = consultant.get();
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), consultant1, HttpStatus.OK);
+        } else {
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), consultant, HttpStatus.BAD_REQUEST);
+        }
     }
 }

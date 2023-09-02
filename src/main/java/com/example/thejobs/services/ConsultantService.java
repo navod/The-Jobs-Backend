@@ -19,4 +19,6 @@ public interface ConsultantService {
     ResponsePayload getAvailabilityByDate(String id, String date);
 
     ResponsePayload getMyBooking(String id);
+
+    ResponsePayload getConsultantDetails(String id);
 }
