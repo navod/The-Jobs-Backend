@@ -1,7 +1,5 @@
 # The-Jobs-Backend
 
-# Backend
-
 ## Development Setup
 
 ### Prerequisites
