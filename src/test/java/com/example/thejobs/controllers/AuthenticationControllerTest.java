@@ -76,11 +76,8 @@ class AuthenticationControllerTest extends AbstractTest {
         String url = "/api/v1/auth/register";
 
         MvcResult mvcResult = mvc.perform(MockMvcRequestBuilders.post(url).contentType(MediaType.APPLICATION_JSON).content(inputJson)).andReturn();
-        ObjectMapper mapper = new ObjectMapper();
-        ResponseEntity responseEntity = mapper.readValue(mvcResult.getResponse().getContentAsString(), ResponseEntity.class);
 
-
-        assertEquals("OK", mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
     }
 
 
