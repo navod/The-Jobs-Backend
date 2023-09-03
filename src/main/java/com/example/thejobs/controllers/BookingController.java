@@ -19,8 +19,8 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping("/register")
-    public ResponsePayload registerConsultant(@RequestBody @Valid JobSeekerDTO jobSeekerDTO) {
-        log.info("consultant register method called {} name", jobSeekerDTO.getFirstName());
+    public ResponsePayload jobSeekerRegister(@RequestBody @Valid JobSeekerDTO jobSeekerDTO) {
+        log.info("jobSeeker register method called {} name", jobSeekerDTO.getFirstName());
         return bookingService.saveBooking(jobSeekerDTO);
     }
 

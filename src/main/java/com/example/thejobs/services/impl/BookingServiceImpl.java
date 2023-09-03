@@ -43,7 +43,7 @@ public class BookingServiceImpl implements BookingService {
         JobSeeker saveJobSeeker = jobSeekerRepository.save(jobSeeker);
         Consultant consultant = consultantRepository.findByCountryAndJobType(jobSeeker.getPreferDestination(), jobSeekerDTO.getPreferJobType());
         if (consultant == null) {
-            consultant = consultantRepository.findByCountry(consultant.getCountry());
+            consultant = consultantRepository.findByCountry(jobSeeker.getPreferDestination());
         }
 
         Booking booking = com.example.thejobs.entity.Booking.builder()
@@ -155,6 +155,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private ResponsePayload sendBookingConfirmEmail(JobSeeker jobSeeker, Booking booking) {
+        log.info("send booking confirmation email method called");
         Map<String, Object> model = new HashMap<>();
         model.put("name", jobSeeker.getFirstName().toUpperCase() + " " + jobSeeker.getLastName().toUpperCase());
         model.put("date", Utility.formatDateTime(booking.getDate(), "yyyy-MM-dd", "dd MMM, yyyy"));
