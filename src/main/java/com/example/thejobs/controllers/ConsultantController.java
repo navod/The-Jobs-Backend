@@ -36,10 +36,16 @@ public class ConsultantController {
         return consultantService.getAllConsultants();
     }
 
+    @GetMapping("/get-my-booking")
+    public ResponsePayload getMyBooking(@RequestParam String id,@RequestParam String status) {
+        log.info("consultant get my booking method called");
+        return consultantService.getMyBooking(id,status);
+    }
+
     @PutMapping("/activation")
-    public ResponsePayload deactivateConsultant(@RequestParam String id,boolean status) {
+    public ResponsePayload deactivateConsultant(@RequestParam String id, boolean status) {
         log.info("consultant activation method called");
-        return consultantService.deactivateConsultant(id,status);
+        return consultantService.deactivateConsultant(id, status);
     }
 
     @DeleteMapping("/delete-consultant")
@@ -47,4 +53,17 @@ public class ConsultantController {
         log.info("consultant delete method called");
         return consultantService.deleteConsultant(id);
     }
+
+    @GetMapping("/get-availability-by-date")
+    public ResponsePayload getAvailabilityByDate(@RequestParam String id, @RequestParam String date) {
+        log.info("get availability by date method called");
+        return consultantService.getAvailabilityByDate(id, date);
+    }
+
+    @GetMapping("/get-consultant")
+    public ResponsePayload getConsultantDetails(@RequestParam String id) {
+        log.info("get consultant detail method called");
+        return consultantService.getConsultantDetails(id);
+    }
+
 }

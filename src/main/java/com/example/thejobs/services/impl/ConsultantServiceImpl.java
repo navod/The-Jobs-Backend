@@ -1,14 +1,17 @@
 package com.example.thejobs.services.impl;
 
 import com.example.thejobs.advice.ResponsePayload;
+import com.example.thejobs.dto.BookingDTO;
+import com.example.thejobs.dto.BookingResponseDTO;
+import com.example.thejobs.dto.JobSeekerDTO;
 import com.example.thejobs.dto.auth.RegisterRequest;
 import com.example.thejobs.dto.consultant.ConsultantDTO;
-import com.example.thejobs.dto.consultant.ConsultantRequestDTO;
+import com.example.thejobs.dto.consultant.ConsultantRespDTO;
 import com.example.thejobs.dto.consultant.TimeSlots;
-import com.example.thejobs.entity.Availability;
-import com.example.thejobs.entity.Consultant;
-import com.example.thejobs.entity.User;
+import com.example.thejobs.dto.enums.DAYS;
+import com.example.thejobs.entity.*;
 import com.example.thejobs.repo.AvailabilityRepository;
+import com.example.thejobs.repo.BookingRepository;
 import com.example.thejobs.repo.ConsultantRepository;
 import com.example.thejobs.repo.UserRepository;
 import com.example.thejobs.services.AuthenticationService;
@@ -23,10 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 
 @Service
@@ -40,6 +40,7 @@ public class ConsultantServiceImpl implements ConsultantService {
     private final AvailabilityRepository availabilityRepository;
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -50,6 +51,7 @@ public class ConsultantServiceImpl implements ConsultantService {
             Consultant consultant = modelMapper.map(consultantDTO, Consultant.class);
             String userId = UUID.randomUUID().toString();
             consultant.setId(userId);
+            consultant.setCreatedDate(Calendar.getInstance().getTime());
             consultant.setStatus(true);
             RegisterRequest register = modelMapper.map(consultantDTO, RegisterRequest.class);
             register.setId(userId);
@@ -67,6 +69,7 @@ public class ConsultantServiceImpl implements ConsultantService {
                             .day(slot.getDay())
                             .endTime((slot.getEndTime()))
                             .startTime(slot.getStartTime())
+                            .status(slot.isStatus())
                             .timeSlots(objectMapper.writeValueAsString(Utility.generateValues(slot.getStartTime(), slot.getEndTime())))
                             .consultant(cons)
                             .build();
@@ -93,11 +96,11 @@ public class ConsultantServiceImpl implements ConsultantService {
         log.info("consultant update impl-method called {} name", consultantDTO.getFirstName());
         try {
 
-            Optional<Consultant> existConsultant = consultantRepository.findById(consultantDTO.getId());
+            Optional<com.example.thejobs.entity.Consultant> existConsultant = consultantRepository.findById(consultantDTO.getId());
             Optional<User> existUser = userRepository.findById(consultantDTO.getId());
 
             if (existConsultant.isPresent() && existUser.isPresent()) {
-                Consultant consultant = modelMapper.map(consultantDTO, Consultant.class);
+                com.example.thejobs.entity.Consultant consultant = modelMapper.map(consultantDTO, com.example.thejobs.entity.Consultant.class);
                 consultant.setStatus(true);
                 consultantRepository.save(consultant);
 
@@ -130,13 +133,13 @@ public class ConsultantServiceImpl implements ConsultantService {
 
     @Override
     public ResponsePayload getAllConsultants() {
-        List<ConsultantRequestDTO> consultantRequestDTOS = new ArrayList<>();
-        List<Consultant> all = consultantRepository.findAll();
+        List<ConsultantRespDTO> consultantRequestDTOS = new ArrayList<>();
+        List<com.example.thejobs.entity.Consultant> all = consultantRepository.findAll();
 
-        for (Consultant dto : all) {
+        for (com.example.thejobs.entity.Consultant dto : all) {
             ConsultantDTO consultantDTO = modelMapper.map(dto, ConsultantDTO.class);
             List<Availability> byConsultantId = availabilityRepository.findByConsultantId(dto.getId());
-            consultantRequestDTOS.add(new ConsultantRequestDTO(consultantDTO, byConsultantId));
+            consultantRequestDTOS.add(new ConsultantRespDTO(consultantDTO, byConsultantId));
         }
         return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), consultantRequestDTOS, HttpStatus.OK);
     }
@@ -145,7 +148,7 @@ public class ConsultantServiceImpl implements ConsultantService {
     @Override
     public ResponsePayload deactivateConsultant(String id, boolean status) {
         log.error("User consultant-impl activation method {}", id);
-        Optional<Consultant> consultants = consultantRepository.findById(id);
+        Optional<com.example.thejobs.entity.Consultant> consultants = consultantRepository.findById(id);
         Optional<User> users = userRepository.findById(id);
         if (consultants.isPresent() && users.isPresent()) {
             Consultant consultant = consultants.get();
@@ -163,11 +166,11 @@ public class ConsultantServiceImpl implements ConsultantService {
 
     @Override
     public ResponsePayload deleteConsultant(String id) {
-        Optional<Consultant> consultants = consultantRepository.findById(id);
+        Optional<com.example.thejobs.entity.Consultant> consultants = consultantRepository.findById(id);
         Optional<User> users = userRepository.findById(id);
 
         if (consultants.isPresent() && users.isPresent()) {
-            Consultant consultant = consultants.get();
+            com.example.thejobs.entity.Consultant consultant = consultants.get();
             User user = users.get();
 
             consultantRepository.delete(consultant);
@@ -176,6 +179,84 @@ public class ConsultantServiceImpl implements ConsultantService {
             return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "user successfully deleted", HttpStatus.OK);
         } else {
             return new ResponsePayload(HttpStatus.BAD_REQUEST.getReasonPhrase(), "user does not exists", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponsePayload getAvailabilityByDate(String id, String date) {
+        Consultant consultant = Consultant.builder().id(id).build();
+        DAYS dayName = Utility.getDayName(date);
+        String[] emp = {};
+        Availability availabilitiesByDay = availabilityRepository.findAvailabilitiesByDayAndConsultant(dayName, consultant);
+        if (!availabilitiesByDay.getTimeSlots().equals("null")) {
+            Booking bookingByDate = bookingRepository.findBookingByDate(date);
+
+            String[] timeSlotsArray = availabilitiesByDay.getTimeSlots()
+                    .replace("[", "")
+                    .replace("]", "")
+                    .split(",");
+
+            for (int i = 0; i < timeSlotsArray.length; i++) {
+                timeSlotsArray[i] = timeSlotsArray[i].trim().replace("\"", "");
+            }
+
+            List<String> timeSlotsList = new ArrayList<>(Arrays.asList(timeSlotsArray));
+
+            if (bookingByDate == null) {
+                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), timeSlotsList, HttpStatus.OK);
+            } else {
+                timeSlotsList.remove(bookingByDate.getTime());
+                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), timeSlotsList, HttpStatus.OK);
+            }
+
+        } else {
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), emp, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Override
+    public ResponsePayload getMyBooking(String id, String status) {
+        Consultant consultant = Consultant.builder().id(id).build();
+        List<Booking> bookings;
+
+        if (status.equals("All")) {
+            bookings = bookingRepository.findBookingByConsultantId(consultant);
+        } else {
+            bookings = bookingRepository.findBookingByConsultantIdAndStatus(consultant, status);
+        }
+
+
+        List<BookingResponseDTO> bookingResponseDTO = new ArrayList<>();
+
+        for (Booking dto : bookings) {
+            Consultant consultantEntity = dto.getConsultantId();
+            JobSeeker jobSeeker = dto.getJobSeekerId();
+            ConsultantDTO consultantDTO = modelMapper.map(consultantEntity, ConsultantDTO.class);
+            BookingDTO booking = modelMapper.map(dto, BookingDTO.class);
+            JobSeekerDTO jobSeekerDTO = modelMapper.map(jobSeeker, JobSeekerDTO.class);
+            BookingResponseDTO brd = BookingResponseDTO.builder()
+                    .consultant(consultantDTO)
+                    .booking(booking)
+                    .jobSeeker(jobSeekerDTO)
+                    .build();
+
+            bookingResponseDTO.add(brd);
+        }
+
+        return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), bookingResponseDTO, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponsePayload getConsultantDetails(String id) {
+        log.info("consultant details method called id {}", id);
+
+        Optional<Consultant> consultant = consultantRepository.findById(id);
+
+        if (consultant.isPresent()) {
+            Consultant consultant1 = consultant.get();
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), consultant1, HttpStatus.OK);
+        } else {
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), consultant, HttpStatus.BAD_REQUEST);
         }
     }
 }

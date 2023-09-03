@@ -1,6 +1,7 @@
 package com.example.thejobs.services.impl;
 
 import com.example.thejobs.advice.ResponsePayload;
+import com.example.thejobs.dto.MainUserDTO;
 import com.example.thejobs.dto.auth.AuthenticationRequest;
 import com.example.thejobs.dto.auth.AuthenticationResponse;
 import com.example.thejobs.dto.auth.RegisterRequest;
@@ -40,7 +41,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final ConsultantRepository consultantRepository;
 
     @Override
     public ResponsePayload register(RegisterRequest request) {
@@ -53,21 +53,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .status(true)
                     .role(request.getRole())
                     .build();
-            var savedUser = repository.save(user);
 
-            if (user.getRole().toString().equals("USER")) {
-                var jwtToken = jwtService.generateToken(user);
-                var refreshToken = jwtService.generateRefreshToken(user);
-                saveUserToken(savedUser, jwtToken);
-                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), AuthenticationResponse.builder()
-                        .accessToken(jwtToken)
-                        .refreshToken(refreshToken)
-                        .build(), HttpStatus.OK);
+            repository.save(user);
 
-            } else {
-                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "User Added", HttpStatus.OK);
-            }
-
+//            if (user.getRole().toString().equals("ADMIN")) {
+//                var jwtToken = jwtService.generateToken(user);
+//                var refreshToken = jwtService.generateRefreshToken(user);
+//                saveUserToken(savedUser, jwtToken);
+//                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), AuthenticationResponse.builder()
+//                        .accessToken(jwtToken)
+//                        .refreshToken(refreshToken)
+//                        .build(), HttpStatus.OK);
+//
+//            } else {
+//                return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "User Added", HttpStatus.OK);
+//            }
+            return new ResponsePayload(HttpStatus.OK.getReasonPhrase(), "User Added", HttpStatus.OK);
         } catch (Exception e) {
             log.error("Exception occurred when try to register User : ", e);
             try {
@@ -91,11 +92,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             var user = repository.findByEmail(request.getEmail())
                     .orElseThrow();
 
-            if (user.getRole().equals("CONSULTANT")) {
-                var consultant = consultantRepository.findByEmail(request.getEmail());
-                user.setId(consultant.getId());
 
-            }
             var jwtToken = jwtService.generateToken(user);
             var refreshToken = jwtService.generateRefreshToken(user);
             revokeAllUserTokens(user);
