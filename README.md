@@ -8,7 +8,7 @@
 
 - Install [Git](https://git-scm.com/downloads)
 - Install [Java](https://openjdk.org/install/)
-- Install [Maven](https://maven.apache.org/install.html)
+- Install [Gradle](https://gradle.org/install/)
 
 ### Setting Up the Project
 
@@ -25,5 +25,5 @@ git clone https://github.com/navod/The-Jobs-Backend.git
 ### Run the Project
 
 ```shell
-java -jar ./target/backend-0.1.0.jar com.example.backend.BackendApplication
+./gradlew runProject
 ```
