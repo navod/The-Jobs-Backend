@@ -37,9 +37,9 @@ public class ConsultantController {
     }
 
     @GetMapping("/get-my-booking")
-    public ResponsePayload getMyBooking(@RequestParam String id) {
+    public ResponsePayload getMyBooking(@RequestParam String id,@RequestParam String status) {
         log.info("consultant get my booking method called");
-        return consultantService.getMyBooking(id);
+        return consultantService.getMyBooking(id,status);
     }
 
     @PutMapping("/activation")

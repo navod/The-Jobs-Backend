@@ -9,9 +9,10 @@ public interface BookingService {
 
     ResponsePayload acceptBooking(BookingDTO bookingDTO);
 
-    ResponsePayload getAllBooking();
+    ResponsePayload getAllBooking(String status);
 
     ResponsePayload rejectBooking(BookingDTO bookingDTO);
 
     ResponsePayload completeBooking(int id);
+
 }

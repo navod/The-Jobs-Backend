@@ -51,6 +51,7 @@ public class ConsultantServiceImpl implements ConsultantService {
             Consultant consultant = modelMapper.map(consultantDTO, Consultant.class);
             String userId = UUID.randomUUID().toString();
             consultant.setId(userId);
+            consultant.setCreatedDate(Calendar.getInstance().getTime());
             consultant.setStatus(true);
             RegisterRequest register = modelMapper.map(consultantDTO, RegisterRequest.class);
             register.setId(userId);
@@ -68,6 +69,7 @@ public class ConsultantServiceImpl implements ConsultantService {
                             .day(slot.getDay())
                             .endTime((slot.getEndTime()))
                             .startTime(slot.getStartTime())
+                            .status(slot.isStatus())
                             .timeSlots(objectMapper.writeValueAsString(Utility.generateValues(slot.getStartTime(), slot.getEndTime())))
                             .consultant(cons)
                             .build();
@@ -213,9 +215,16 @@ public class ConsultantServiceImpl implements ConsultantService {
     }
 
     @Override
-    public ResponsePayload getMyBooking(String id) {
+    public ResponsePayload getMyBooking(String id, String status) {
         Consultant consultant = Consultant.builder().id(id).build();
-        List<Booking> bookings = bookingRepository.findBookingByConsultantId(consultant);
+        List<Booking> bookings;
+
+        if (status.equals("All")) {
+            bookings = bookingRepository.findBookingByConsultantId(consultant);
+        } else {
+            bookings = bookingRepository.findBookingByConsultantIdAndStatus(consultant, status);
+        }
+
 
         List<BookingResponseDTO> bookingResponseDTO = new ArrayList<>();
 

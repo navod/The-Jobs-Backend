@@ -43,8 +43,8 @@ public class BookingController {
     }
 
     @GetMapping("/get-all")
-    public ResponsePayload getAllBooking() {
+    public ResponsePayload getAllBooking(@RequestParam String status) {
         log.info("get all booking method called");
-        return bookingService.getAllBooking();
+        return bookingService.getAllBooking(status);
     }
 }
