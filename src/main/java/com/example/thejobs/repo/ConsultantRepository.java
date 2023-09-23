@@ -20,7 +20,7 @@ public interface ConsultantRepository extends JpaRepository<Consultant, String> 
     int getTotalActiveConsultants();
 
     @Query(value = """
-                SELECT COUNT(*) as deactive_consultants FROM consultant WHERE `status`=2
+                SELECT COUNT(*) as deactive_consultants FROM consultant WHERE `status`=0
             """, nativeQuery = true)
     int getTotalDeactiveConsultants();
 
