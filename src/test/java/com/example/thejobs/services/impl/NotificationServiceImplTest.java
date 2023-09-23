@@ -44,9 +44,6 @@ class NotificationServiceImplTest {
     @Autowired
     private NotificationServiceImpl notificationServiceImpl;
 
-    /**
-     * Method under test: {@link NotificationServiceImpl#sendBookingConfirmEmail(String, Map)}
-     */
     @Test
     void testSendBookingConfirmEmail() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();

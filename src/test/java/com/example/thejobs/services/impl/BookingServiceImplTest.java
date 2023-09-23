@@ -63,9 +63,6 @@ class BookingServiceImplTest {
     @MockBean
     private NotificationService notificationService;
 
-    /**
-     * Method under test: {@link BookingServiceImpl#saveBooking(JobSeekerDTO)}
-     */
     @Test
     void testSaveBooking() {
         JobSeeker jobSeeker = new JobSeeker();
@@ -159,23 +156,10 @@ class BookingServiceImplTest {
         verify(notificationService).sendBookingPendingEmail(Mockito.<String>any(), Mockito.<Map<String, Object>>any());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#acceptBooking(BookingDTO)}
-     */
+
     @Test
     @Disabled("TODO: Complete this test")
     void testAcceptBooking() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   java.lang.NullPointerException: Cannot invoke "String.length()" because "text" is null
-        //       at java.base/java.text.SimpleDateFormat.parse(SimpleDateFormat.java:1474)
-        //       at java.base/java.text.DateFormat.parse(DateFormat.java:397)
-        //       at com.example.thejobs.utility.Utility.formatDateTime(Utility.java:54)
-        //       at com.example.thejobs.services.impl.BookingServiceImpl.sendBookingConfirmEmail(BookingServiceImpl.java:161)
-        //       at com.example.thejobs.services.impl.BookingServiceImpl.acceptBooking(BookingServiceImpl.java:79)
-        //   See https://diff.blue/R013 to resolve this issue.
 
         JobSeeker jobSeeker = new JobSeeker();
         jobSeeker.setAge(1);
@@ -268,20 +252,11 @@ class BookingServiceImplTest {
         bookingServiceImpl.acceptBooking(new BookingDTO());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#acceptBooking(BookingDTO)}
-     */
+
     @Test
     @Disabled("TODO: Complete this test")
     void testAcceptBooking2() {
-        // TODO: Complete this test.
-        //   Reason: R013 No inputs found that don't throw a trivial exception.
-        //   Diffblue Cover tried to run the arrange/act section, but the method under
-        //   test threw
-        //   java.util.NoSuchElementException: No value present
-        //       at java.base/java.util.Optional.get(Optional.java:143)
-        //       at com.example.thejobs.services.impl.BookingServiceImpl.acceptBooking(BookingServiceImpl.java:71)
-        //   See https://diff.blue/R013 to resolve this issue.
+
 
         Optional<JobSeeker> emptyResult = Optional.empty();
         when(jobSeekerRepository.findById(Mockito.<String>any())).thenReturn(emptyResult);
@@ -366,9 +341,7 @@ class BookingServiceImplTest {
         bookingServiceImpl.acceptBooking(new BookingDTO());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#acceptBooking(BookingDTO)}
-     */
+
     @Test
     void testAcceptBooking3() {
         JobSeeker jobSeeker = mock(JobSeeker.class);
@@ -537,9 +510,7 @@ class BookingServiceImplTest {
         verify(notificationService).sendBookingConfirmEmail(Mockito.<String>any(), Mockito.<Map<String, Object>>any());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#acceptBooking(BookingDTO)}
-     */
+
     @Test
     void testAcceptBooking4() {
         JobSeeker jobSeeker = new JobSeeker();
@@ -653,9 +624,7 @@ class BookingServiceImplTest {
         verify(notificationService).sendBookingConfirmEmail(Mockito.<String>any(), Mockito.<Map<String, Object>>any());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#rejectBooking(BookingDTO)}
-     */
+
     @Test
     void testRejectBooking() {
         Consultant consultantId = new Consultant();
@@ -743,9 +712,7 @@ class BookingServiceImplTest {
         verify(bookingRepository).findById(Mockito.<Integer>any());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#rejectBooking(BookingDTO)}
-     */
+
     @Test
     void testRejectBooking2() {
         Consultant consultantId = new Consultant();
@@ -858,9 +825,7 @@ class BookingServiceImplTest {
         verify(booking, atLeast(1)).setTime(Mockito.<String>any());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#completeBooking(int)}
-     */
+
     @Test
     void testCompleteBooking() {
         Consultant consultantId = new Consultant();
@@ -948,9 +913,7 @@ class BookingServiceImplTest {
         verify(bookingRepository).findById(Mockito.<Integer>any());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#completeBooking(int)}
-     */
+
     @Test
     void testCompleteBooking2() {
         Consultant consultantId = new Consultant();
@@ -1055,9 +1018,6 @@ class BookingServiceImplTest {
         verify(booking, atLeast(1)).setTime(Mockito.<String>any());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllBooking(String)}
-     */
     @Test
     void testGetAllBooking() {
         ArrayList<Booking> bookingList = new ArrayList<>();
@@ -1069,9 +1029,7 @@ class BookingServiceImplTest {
         verify(bookingRepository).findBookingByStatus(Mockito.<String>any());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllBooking(String)}
-     */
+
     @Test
     void testGetAllBooking2() {
         when(modelMapper.map(Mockito.<Object>any(), Mockito.<Class<Object>>any())).thenReturn(null);
@@ -1129,9 +1087,7 @@ class BookingServiceImplTest {
         verify(bookingRepository).findBookingByStatus(Mockito.<String>any());
     }
 
-    /**
-     * Method under test: {@link BookingServiceImpl#getAllBooking(String)}
-     */
+
     @Test
     void testGetAllBooking3() {
         when(modelMapper.map(Mockito.<Object>any(), Mockito.<Class<Object>>any())).thenReturn(null);
