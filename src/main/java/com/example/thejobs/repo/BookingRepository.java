@@ -36,7 +36,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     int getTotalPendingBookings(String consultantId);
 
     @Query(value = """
-                SELECT COUNT(*) as reject_count FROM booking WHERE consultant_id =?1 and `status`="REJECT"
+                SELECT COUNT(*) as reject_count FROM booking WHERE consultant_id =?1 and `status`="REJECTED"
             """, nativeQuery = true)
     int getTotalRejectBookings(String consultantId);
 
@@ -73,7 +73,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     int getTotalPendingBookings();
 
     @Query(value = """
-                SELECT COUNT(*) as reject_count FROM booking WHERE `status`="REJECT"
+                SELECT COUNT(*) as reject_count FROM booking WHERE `status`="REJECTED"
             """, nativeQuery = true)
     int getTotalRejectBookings();
 

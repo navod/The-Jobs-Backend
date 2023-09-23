@@ -30,7 +30,7 @@ public interface ConsultantRepository extends JpaRepository<Consultant, String> 
     int getTotalConsultants();
 
     @Query(value = """
-            SELECT consultant.first_name, consultant.id, consultant.last_name, consultant.email, consultant.job_type, consultant.country, SUM(CASE WHEN booking.`status` = 'APPROVED' AND booking.`date` = CURDATE() THEN 1 ELSE 0 END) AS approved_count, SUM(CASE WHEN booking.`status` = 'REJECT' THEN 1 ELSE 0 END) AS reject_count, SUM(CASE WHEN booking.`status` = 'COMPLETED' THEN 1 ELSE 0 END) AS completed_count, SUM(CASE WHEN booking.`status` = 'PENDING' THEN 1 ELSE 0 END) AS pending_count FROM consultant INNER JOIN booking ON booking.consultant_id = consultant.id GROUP BY consultant.id
+            SELECT consultant.first_name, consultant.id, consultant.last_name, consultant.email, consultant.job_type, consultant.country, SUM(CASE WHEN booking.`status` = 'APPROVED' AND booking.`date` = CURDATE() THEN 1 ELSE 0 END) AS approved_count, SUM(CASE WHEN booking.`status` = 'REJECTED' THEN 1 ELSE 0 END) AS reject_count, SUM(CASE WHEN booking.`status` = 'COMPLETED' THEN 1 ELSE 0 END) AS completed_count, SUM(CASE WHEN booking.`status` = 'PENDING' THEN 1 ELSE 0 END) AS pending_count FROM consultant INNER JOIN booking ON booking.consultant_id = consultant.id GROUP BY consultant.id
             """, nativeQuery = true)
     List<Object> totalConsultsAnalytics();
 }
