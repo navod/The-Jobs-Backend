@@ -1,5 +1,6 @@
 # The-Jobs-Backend
-
+- Admin Portal - https://github.com/navod/The-Jobs-Admin-Portal
+- Frontend - https://github.com/navod/The-Jobs-Frontend
 ## Development Setup
 
 ### Prerequisites
